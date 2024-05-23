@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+         body {
+            background-color: #1f2937;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #374151;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4f46e5;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #4338ca;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <a href="#" id="settingsIcon" class="settings-icon">
+        <i class="fas fa-cog"></i>
+    </a>
+    <div class="container">
+        <h1>Currency Converter</h1>
+        <div>
+            <label for="fromCurrency">From:</label>
+            <input type="text" id="fromCurrency" placeholder="Enter amount">
+            <select id="fromCurrencySelect"></select>
+        </div>
+        <div>
+            <label for="toCurrency">To:</label>
+            <input type="text" id="toCurrency" readonly>
+            <select id="toCurrencySelect"></select>
+        </div>
+        <button id="convertBtn">Convert</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const fromCurrencyInput = document.getElementById('fromCurrency');
+        const fromCurrencySelect = document.getElementById('fromCurrencySelect');
+        const toCurrencyInput = document.getElementById('toCurrency');
+        const toCurrencySelect = document.getElementById('toCurrencySelect');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultElement = document.getElementById('result');
+        const settingsIcon = document.getElementById('settingsIcon');
+        let rates = {}; // Define rates variable
+
+        async function fetchCurrencyRates() {
+            try {
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+                const data = await response.json();
+                rates = data.rates; // Assign rates from response
+                for (const currency in rates) {
+                    const option = document.createElement('option');
+                    option.text = currency;
+                    fromCurrencySelect.add(option);
+                    toCurrencySelect.add(option.cloneNode(true));
+                }
+            } catch (error) {
+                console.error('Error fetching currency rates:', error);
+            }
+        }
+
+        function convertCurrency() {
+            const fromCurrency = fromCurrencySelect.value;
+            const toCurrency = toCurrencySelect.value;
+            const amount = parseFloat(fromCurrencyInput.value);
+
+            if (!isNaN(amount)) {
+                const convertedAmount = amount * (rates[toCurrency] / rates[fromCurrency]);
+                toCurrencyInput.value = convertedAmount.toFixed(2);
+                resultElement.textContent = `${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+            } else {
+                alert('Please enter a valid amount.');
+            }
+        }
+
+        // Event listeners
+        convertBtn.addEventListener('click', convertCurrency);
+        settingsIcon.addEventListener('click', () => {
+            // Add logic for settings icon click
+            alert('Settings icon clicked!');
+        });
+
+        // Initial fetch of currency rates
+        fetchCurrencyRates();
+    </script>
+</body>
+</html>
